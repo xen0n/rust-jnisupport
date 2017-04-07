@@ -4,4 +4,5 @@ version = "0.1.0"
 authors = ["Wang Xuerui <git@xen0n.name>"]
 
 [dependencies]
+jni = "0.4.0"
 jni_macros = { path = "../jni_macros", version = "0.1.0" }
