@@ -1,5 +1,7 @@
 use std::fmt::Write;
 
+use signature::MethodSignature;
+
 
 pub fn get_symbol_name<S, T, U>(class: S, method: T, sig: U) -> String
     where S: AsRef<str>,
@@ -14,23 +16,12 @@ pub fn get_symbol_name<S, T, U>(class: S, method: T, sig: U) -> String
     result.push_str(&mangle_name(method));
     result.push('_');
     result.push('_');
-    result.push_str(&mangle_name(get_arg_sig(sig.as_ref())));
+
+    let sig = MethodSignature::from_utf8(sig.as_ref());
+    result.push_str(&mangle_name(sig.args_string()));
 
     result.shrink_to_fit();
     result
-}
-
-
-fn get_arg_sig<'a>(s: &'a str) -> &'a str {
-    // first char is assumed to be '(', we only have to locate the ')'
-    for (idx, ch) in s.char_indices() {
-        if ch == ')' {
-            return &s[1..idx];
-        }
-    }
-
-    // malformed input
-    s
 }
 
 
@@ -70,13 +61,6 @@ mod tests {
     fn test_get_symbol_name() {
         assert_eq!(&get_symbol_name("pkg/Cls", "f", "(ILjava/lang/String;)D"),
                    "Java_pkg_Cls_f__ILjava_lang_String_2");
-    }
-
-
-    #[test]
-    fn test_get_arg_sig() {
-        assert_eq!(get_arg_sig("(III)I"), "III");
-        assert_eq!(get_arg_sig("(ILjava/lang/String;)Z"), "ILjava/lang/String;");
     }
 
 

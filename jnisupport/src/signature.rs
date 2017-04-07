@@ -78,6 +78,19 @@ impl MethodSignature {
     pub fn ret<'a>(&'a self) -> Option<&'a JavaTy> {
         self.ret.as_ref()
     }
+
+    pub fn args_string(&self) -> String {
+        let mut result = String::new();
+        for arg in &self.args {
+            match arg.to_str() {
+                Cow::Borrowed(s) => result.push_str(s),
+                Cow::Owned(s) => result.push_str(&s),
+            }
+        }
+
+        result.shrink_to_fit();
+        result
+    }
 }
 
 
