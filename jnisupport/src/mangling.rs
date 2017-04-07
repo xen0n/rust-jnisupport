@@ -3,10 +3,9 @@ use std::fmt::Write;
 use signature::MethodSignature;
 
 
-pub fn get_symbol_name<S, T, U>(class: S, method: T, sig: U) -> String
+pub fn get_symbol_name<S, T>(class: S, method: T, sig: &MethodSignature) -> String
     where S: AsRef<str>,
-          T: AsRef<str>,
-          U: AsRef<str>
+          T: AsRef<str>
 {
     let mut result = String::new();
 
@@ -17,7 +16,6 @@ pub fn get_symbol_name<S, T, U>(class: S, method: T, sig: U) -> String
     result.push('_');
     result.push('_');
 
-    let sig = MethodSignature::from_utf8(sig.as_ref());
     result.push_str(&mangle_name(sig.args_string()));
 
     result.shrink_to_fit();

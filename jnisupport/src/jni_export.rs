@@ -4,6 +4,7 @@ use syn;
 use quote::ToTokens;
 
 use mangling;
+use signature;
 
 
 fn panic_usage() -> ! {
@@ -52,12 +53,13 @@ pub fn jni_export_impl(args: syn::Attribute, body: syn::Item) -> quote::Tokens {
     // automatically replace dots in class path with slashes for better
     // ergonomics
     let class = class.replace('.', "/");
+    let sig = signature::MethodSignature::from_utf8(sig);
 
     println!("DEBUG: class = {}", class);
     println!("DEBUG: name = {}", name);
-    println!("DEBUG: sig = {}", sig);
+    println!("DEBUG: sig = {:?}", sig);
 
-    let sym_name = syn::Ident::new(mangling::get_symbol_name(class, name, sig));
+    let sym_name = syn::Ident::new(mangling::get_symbol_name(class, name, &sig));
     println!("DEBUG: symbol name = {:?}", sym_name);
 
     // TODO
