@@ -13,9 +13,6 @@ fn panic_usage() -> ! {
 
 
 pub fn jni_export_impl(args: syn::Attribute, body: syn::Item) -> quote::Tokens {
-    println!("DEBUG: args = {:?}", args);
-    println!("DEBUG: body = {:?}", body);
-
     // get rust function name
     let fn_name: &str = body.ident.as_ref();
 
@@ -58,13 +55,7 @@ pub fn jni_export_impl(args: syn::Attribute, body: syn::Item) -> quote::Tokens {
     let class = class.replace('.', "/");
     let sig = signature::MethodSignature::from_utf8(sig);
 
-    println!("DEBUG: class = {}", class);
-    println!("DEBUG: name = {}", name);
-    println!("DEBUG: sig = {:?}", sig);
-    println!("DEBUG: rust fn name = {}", fn_name);
-
     let sym_name = syn::Ident::new(mangling::get_symbol_name(class, name, &sig));
-    println!("DEBUG: symbol name = {:?}", sym_name);
 
     // generate signature
     let fn_name = syn::Ident::new(fn_name);
@@ -79,8 +70,6 @@ pub fn jni_export_impl(args: syn::Attribute, body: syn::Item) -> quote::Tokens {
         Some(ty) => Some(jni_ident_from_ty(ty)),
         None => None,
     };
-    println!("DEBUG: args ty = {:?}", arg_ty);
-    println!("DEBUG: ret ty = {:?}", ret_ty);
 
     // pass through original function
     let mut result = quote::Tokens::new();
@@ -89,8 +78,6 @@ pub fn jni_export_impl(args: syn::Attribute, body: syn::Item) -> quote::Tokens {
     // append export fn to token stream
     let export_fn = emit_export_fn(fn_name, sym_name, arg_names, arg_ty, ret_ty);
     export_fn.to_tokens(&mut result);
-
-    println!("DEBUG: result = {:?}", result);
 
     result
 }
