@@ -50,7 +50,7 @@ fn mangle_name<S: AsRef<str>>(s: S) -> String {
                 let buf = ch.encode_utf16(&mut buf);
                 for i in buf {
                     result.push_str("_0");
-                    write!(result, "{:04x}", i);
+                    write!(result, "{:04x}", i).unwrap();
                 }
             }
         }
