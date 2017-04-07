@@ -1,15 +1,16 @@
 #![feature(proc_macro)]
 
+extern crate jnisupport;
 extern crate proc_macro;
 #[macro_use]
 extern crate quote;
 extern crate syn;
 
 
-mod jni_export;
 mod utils;
 
 
+use jnisupport::jni_export;
 use proc_macro::TokenStream;
 
 
