@@ -12,6 +12,14 @@ fn panic_usage() -> ! {
 }
 
 
+fn separate_method_name<'a>(path: &'a str) -> (&'a str, &'a str) {
+    match path.rfind('.') {
+        Some(idx) => (&path[..idx], &path[idx + 1..]),
+        None => panic!("illegal fully qualified method name"),
+    }
+}
+
+
 pub fn jni_export_impl(args: syn::Attribute, body: syn::Item) -> quote::Tokens {
     // get rust function name
     let fn_name: &str = body.ident.as_ref();
@@ -23,18 +31,54 @@ pub fn jni_export_impl(args: syn::Attribute, body: syn::Item) -> quote::Tokens {
             let mut name = None;
             let mut sig = None;
 
-            for item in params {
+            #[derive(Copy, Clone, PartialEq, Eq)]
+            enum InvocationMode {
+                TBD,
+                ClassNameSig,
+                PathSig,
+            }
+
+            let mut mode = InvocationMode::TBD;
+
+            for (idx, item) in params.into_iter().enumerate() {
                 use syn::NestedMetaItem;
                 use syn::MetaItem::NameValue;
                 use syn::Lit::Str;
 
                 match item {
                     NestedMetaItem::MetaItem(NameValue(k, Str(v, _))) => {
+                        match mode {
+                            InvocationMode::TBD => {
+                                mode = InvocationMode::ClassNameSig;
+                            }
+                            InvocationMode::ClassNameSig => {}
+                            _ => panic_usage(),
+                        }
+
                         let k: &str = k.as_ref();
                         match k {
                             "class" => class = Some(v),
                             "name" => name = Some(v),
                             "sig" => sig = Some(v),
+                            _ => panic_usage(),
+                        }
+                    }
+                    NestedMetaItem::Literal(Str(v, _)) => {
+                        match mode {
+                            InvocationMode::TBD => {
+                                mode = InvocationMode::PathSig;
+                            }
+                            InvocationMode::PathSig => {}
+                            _ => panic_usage(),
+                        }
+
+                        match idx {
+                            0 => {
+                                let (c, n) = separate_method_name(&v);
+                                class = Some(c.to_owned());
+                                name = Some(n.to_owned());
+                            }
+                            1 => sig = Some(v),
                             _ => panic_usage(),
                         }
                     }
