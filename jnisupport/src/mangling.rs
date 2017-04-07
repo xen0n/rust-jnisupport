@@ -1,7 +1,25 @@
 use std::fmt::Write;
 
 
-pub fn mangle_name<S: AsRef<str>>(s: S) -> String {
+pub fn get_symbol_name(class: &str, method: &str, args: Option<&str>) -> String {
+    let mut result = String::new();
+
+    result.push_str("Java_");
+    result.push_str(&mangle_name(class));
+    result.push('_');
+    result.push_str(&mangle_name(method));
+    if let Some(args) = args {
+        result.push('_');
+        result.push('_');
+        result.push_str(&mangle_name(args));
+    }
+
+    result.shrink_to_fit();
+    result
+}
+
+
+fn mangle_name<S: AsRef<str>>(s: S) -> String {
     let s = s.as_ref();
     let mut result = String::with_capacity(s.len());
 
@@ -31,6 +49,14 @@ pub fn mangle_name<S: AsRef<str>>(s: S) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+
+    #[test]
+    fn test_get_symbol_name() {
+        assert_eq!(&get_symbol_name("Cls1", "g", None), "Java_Cls1_g");
+        assert_eq!(&get_symbol_name("pkg/Cls", "f", Some("ILjava/lang/String;")),
+                   "Java_pkg_Cls_f__ILjava_lang_String_2");
+    }
 
 
     #[test]
