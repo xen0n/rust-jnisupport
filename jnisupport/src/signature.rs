@@ -119,7 +119,9 @@ mod tests {
                    });
         assert_eq!(MethodSignature::from_utf8("(ILjava/lang/String;[I)J"),
                    MethodSignature {
-                       args: vec![Int, Class("java/lang/String".to_string()), Array("I".to_string())],
+                       args: vec![Int,
+                                  Class("java/lang/String".to_string()),
+                                  Array("I".to_string())],
                        ret: Some(Long),
                    });
     }
