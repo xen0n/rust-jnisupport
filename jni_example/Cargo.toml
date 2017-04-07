@@ -1,0 +1,7 @@
+[package]
+name = "jni_example"
+version = "0.1.0"
+authors = ["Wang Xuerui <git@xen0n.name>"]
+
+[dependencies]
+jni_macros = { path = "../jni_macros", version = "0.1.0" }
