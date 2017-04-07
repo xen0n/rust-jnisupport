@@ -3,6 +3,8 @@ use syn;
 
 use quote::ToTokens;
 
+use mangling;
+
 
 fn panic_usage() -> ! {
     panic!("incorrect usage; please consult documentation");
@@ -47,9 +49,16 @@ pub fn jni_export_impl(args: syn::Attribute, body: syn::Item) -> quote::Tokens {
         _ => panic_usage(),
     };
 
+    // automatically replace dots in class path with slashes for better
+    // ergonomics
+    let class = class.replace('.', "/");
+
     println!("DEBUG: class = {}", class);
     println!("DEBUG: name = {}", name);
     println!("DEBUG: sig = {}", sig);
+
+    let sym_name = syn::Ident::new(mangling::get_symbol_name(class, name, sig));
+    println!("DEBUG: symbol name = {:?}", sym_name);
 
     // TODO
     let mut result = quote::Tokens::new();
