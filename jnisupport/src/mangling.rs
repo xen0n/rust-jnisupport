@@ -1,21 +1,36 @@
 use std::fmt::Write;
 
 
-pub fn get_symbol_name(class: &str, method: &str, args: Option<&str>) -> String {
+pub fn get_symbol_name<S, T, U>(class: S, method: T, sig: U) -> String
+    where S: AsRef<str>,
+          T: AsRef<str>,
+          U: AsRef<str>
+{
     let mut result = String::new();
 
     result.push_str("Java_");
     result.push_str(&mangle_name(class));
     result.push('_');
     result.push_str(&mangle_name(method));
-    if let Some(args) = args {
-        result.push('_');
-        result.push('_');
-        result.push_str(&mangle_name(args));
-    }
+    result.push('_');
+    result.push('_');
+    result.push_str(&mangle_name(get_arg_sig(sig.as_ref())));
 
     result.shrink_to_fit();
     result
+}
+
+
+fn get_arg_sig<'a>(s: &'a str) -> &'a str {
+    // first char is assumed to be '(', we only have to locate the ')'
+    for (idx, ch) in s.char_indices() {
+        if ch == ')' {
+            return &s[1..idx];
+        }
+    }
+
+    // malformed input
+    s
 }
 
 
@@ -53,9 +68,15 @@ mod tests {
 
     #[test]
     fn test_get_symbol_name() {
-        assert_eq!(&get_symbol_name("Cls1", "g", None), "Java_Cls1_g");
-        assert_eq!(&get_symbol_name("pkg/Cls", "f", Some("ILjava/lang/String;")),
+        assert_eq!(&get_symbol_name("pkg/Cls", "f", "(ILjava/lang/String;)D"),
                    "Java_pkg_Cls_f__ILjava_lang_String_2");
+    }
+
+
+    #[test]
+    fn test_get_arg_sig() {
+        assert_eq!(get_arg_sig("(III)I"), "III");
+        assert_eq!(get_arg_sig("(ILjava/lang/String;)Z"), "ILjava/lang/String;");
     }
 
 
